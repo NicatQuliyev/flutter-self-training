@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:first_flutter_app/todo.dart';
 
+
 class TodoList extends StatefulWidget {
   @override
   _TodoListState createState() => _TodoListState();
@@ -20,16 +21,66 @@ class _TodoListState extends State<TodoList> {
       todo.isDone = isChecked;
     });
   }
+  _removeTodo(Todo todo){
+    setState(() {
+      this.todos.remove(todo);
+    });
+  }
+  _addToList(Todo todo){
+    setState(() {
+      this.todos.add(todo);
+    });
+  }
 
   Widget _buildItem(BuildContext context, int index) {
     final todo = todos[index];
 
-    return CheckboxListTile(
-      value:todo.isDone,
-      title: Text(todo.title),
-      onChanged: (bool isChecked) {
-        _toggleTodo(todo, isChecked);
-      },
+    return ListTile(
+      onTap: null,
+      title: new Row(
+        children: <Widget>[
+          new Expanded(child: new Text(todo.title)),
+          new Checkbox(
+              value: todo.isDone,
+              onChanged: (bool isChecked){
+                _toggleTodo(todo, isChecked);
+              }
+          ),
+          new FlatButton(
+              onPressed: (){
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context){
+                    return AlertDialog(
+                      title: Text("Delete task"),
+                      content: Text("Are you sure to delete this task ?"),
+                      actions: [
+                        FlatButton(
+                          child: Text("Yes"),
+                          onPressed: (){
+                            setState(() {
+//                              todos.remove(todo);
+                              _removeTodo(todo);
+                              Navigator.of(context).pop();
+                            });
+                          },
+                        ),
+                        FlatButton(
+                          child: Text("No"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        )
+                      ],
+                    );
+                  }
+                );
+              },
+              child: Icon(Icons.remove_circle, color: Colors.red,)
+          )
+        ],
+
+      ),
     );
  }
 
@@ -63,9 +114,7 @@ class _TodoListState extends State<TodoList> {
         }
     );
     if(todo != null){
-      setState(() {
-        todos.add(todo);
-      });
+      _addToList(todo);
     }
   }
 
