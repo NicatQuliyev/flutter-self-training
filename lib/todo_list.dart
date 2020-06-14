@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:first_flutter_app/todo.dart';
-
+import 'API.dart';
 
 class TodoList extends StatefulWidget {
   @override
@@ -8,6 +9,21 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+
+  initState(){
+    super.initState();
+    _getTodos();
+  }
+
+  _getTodos(){
+    API.getTodos().then((response){
+          setState(() {
+            Iterable list = json.decode(response.body);
+            todos = list.map((model) => Todo.fromJson(model)).toList();
+          });
+    });
+  }
+
   List<Todo> todos = [
     Todo(title: 'Learn Dart'),
     Todo(title: 'Try Flutter'),
@@ -119,6 +135,8 @@ class _TodoListState extends State<TodoList> {
   }
 
   @override
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("To-Do List")),
@@ -128,7 +146,9 @@ class _TodoListState extends State<TodoList> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add_box),
-        onPressed: _addTodo,
+        onPressed: (){
+          _addTodo();
+        },
       ),
     );
   }
