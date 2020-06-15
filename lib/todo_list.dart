@@ -25,9 +25,6 @@ class _TodoListState extends State<TodoList> {
   }
 
   List<Todo> todos = [
-    Todo(title: 'Learn Dart'),
-    Todo(title: 'Try Flutter'),
-    Todo(title: 'Be amazed!')
   ];
 
     TextEditingController controller = new TextEditingController();
@@ -139,7 +136,6 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("To-Do List")),
       body: ListView.builder(
           itemBuilder: _buildItem,
           itemCount: todos.length,
