@@ -1,3 +1,4 @@
+import 'package:first_flutter_app/todo_list_done.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:first_flutter_app/todo_list.dart';
@@ -14,14 +15,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       themeMode: ThemeMode.system,
       home: DefaultTabController(
-        length: 3,
+        length: 2,
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             bottom: TabBar(
               tabs: [
                 Tab(icon: Icon(Icons.category)),
-                Tab(icon: Icon(Icons.done)),
-                Tab(icon: Icon(Icons.filter_list))
+                Tab(icon: Icon(Icons.done))
               ],
             ),
             title: Text("To-do List"),
@@ -29,8 +30,7 @@ class MyApp extends StatelessWidget {
           body: TabBarView(
             children: [
               TodoList(),
-              Icon(Icons.done),
-              Icon(Icons.filter_list)
+              TodoListDone()
             ],
           ),
         ),

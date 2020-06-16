@@ -5,7 +5,7 @@ class Todo {
   String title;
   bool isDone;
 
-  Todo.fromJson(Map json)
+  Todo.fromJson(Map<String, dynamic> json)
     :
     id = json['id'],
     title  = json['title'],

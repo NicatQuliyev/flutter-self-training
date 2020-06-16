@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:first_flutter_app/todo.dart';
 import 'package:http/http.dart' as http;
 
-const baseUrl = "http://23.102.178.205:8080/api/v1/";
+const baseUrl = "";
 const headers = <String, String>{
   'Content-Type': 'application/json; charset=UTF-8'
 };
@@ -11,6 +11,11 @@ const headers = <String, String>{
 class API {
   static Future getTodos(int state) {
     var url = baseUrl + "tasks/?isdone=${state}";
+    return http.get(url);
+  }
+
+  static Future getTask(int id) {
+    var url = baseUrl + "tasks/${id}";
     return http.get(url);
   }
 

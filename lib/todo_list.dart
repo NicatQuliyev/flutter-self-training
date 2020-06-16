@@ -26,48 +26,102 @@ class _TodoListState extends State<TodoList> {
 
   List<Todo> todos = [
   ];
+  Todo selectedTodo = null;
 
     TextEditingController controller = new TextEditingController();
+    TextEditingController editController = new TextEditingController();
 
   _toggleTodo(Todo todo, bool isChecked){
     todo.isDone = isChecked;
     API.updateTask(todo);
     _getTodos(0);
+    final snackbar = SnackBar(content: Text("Done: ${todo.title}"), backgroundColor: Colors.greenAccent);
+    Scaffold.of(context).showSnackBar(snackbar);
   }
   _removeTodo(Todo todo){
     setState(() {
       API.deleteTask(todo.id);
       _getTodos(0);
     });
+    final snackbar = SnackBar(content: Text("Removed: ${todo.title}"), backgroundColor: Colors.red);
+    Scaffold.of(context).showSnackBar(snackbar);
   }
   _addToList(String title){
     setState(() {
       API.storeTodo(title);
     });
+    final snackbar = SnackBar(content: Text("Added: ${title}"), backgroundColor: Colors.greenAccent);
+    Scaffold.of(context).showSnackBar(snackbar);
+  }
+
+  _editTodo() async{
+    final todo = await showDialog<Todo>(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: Text("Edit todo"),
+            content: TextField(
+              controller: editController,
+              autofocus: true,
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: Text("Save"),
+                onPressed: (){
+                  final todo = new Todo(title: editController.value.text);
+                  controller.clear();
+                  Navigator.of(context).pop(todo);
+                },
+              )
+            ],
+          );
+        }
+    );
+    if(todo != null){
+      setState(() {
+        selectedTodo.title = editController.text;
+      });
+      API.updateTask(selectedTodo);
+      final snackbar = SnackBar(content: Text("Edited: ${todo.title}"), backgroundColor: Colors.greenAccent);
+      Scaffold.of(context).showSnackBar(snackbar);
+      _getTodos(0);
+    }
   }
 
   Widget _buildItem(BuildContext context, int index) {
     final todo = todos[index];
-
     return ListTile(
       onTap: null,
       title: new Row(
         children: <Widget>[
           new Expanded(child: new Text(todo.title)),
-          new Checkbox(
-              value: todo.isDone,
-              onChanged: (bool isChecked){
-                _toggleTodo(todo, isChecked);
+
+          new IconButton(
+              icon: Icon(Icons.done_all, color: Colors.green),
+              onPressed: (){
+                _toggleTodo(todo, true);
               }
           ),
-          new FlatButton(
-              onPressed: null,
-              child: Icon(
+          new IconButton(
+              onPressed: () {
+                setState(() {
+                  selectedTodo = todo;
+                });
+                editController.text = selectedTodo.title;
+                _editTodo();
+              },
+              icon: Icon(
                 Icons.edit,
                 color: Colors.green,
               ),
               ),
-          new FlatButton(
+          new IconButton(
               onPressed: (){
                 showDialog(
                   context: context,
@@ -96,10 +150,9 @@ class _TodoListState extends State<TodoList> {
                   }
                 );
               },
-              child: Icon(Icons.remove_circle, color: Colors.red,)
+              icon: Icon(Icons.remove_circle, color: Colors.red)
           )
         ],
-
       ),
     );
  }
@@ -138,12 +191,6 @@ class _TodoListState extends State<TodoList> {
       _getTodos(0);
     }
   }
-
-  _editTodo() {
-
-  }
-
-  @override
 
   @override
   Widget build(BuildContext context) {
