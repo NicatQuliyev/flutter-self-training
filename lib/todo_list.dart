@@ -12,11 +12,11 @@ class _TodoListState extends State<TodoList> {
 
   initState(){
     super.initState();
-    _getTodos();
+    _getTodos(0);
   }
 
-  _getTodos(){
-    API.getTodos().then((response){
+  _getTodos(int state){
+    API.getTodos(state).then((response){
           setState(() {
             Iterable list = json.decode(response.body);
             todos = list.map((model) => Todo.fromJson(model)).toList();
@@ -30,18 +30,19 @@ class _TodoListState extends State<TodoList> {
     TextEditingController controller = new TextEditingController();
 
   _toggleTodo(Todo todo, bool isChecked){
-    setState(() {
-      todo.isDone = isChecked;
-    });
+    todo.isDone = isChecked;
+    API.updateTask(todo);
+    _getTodos(0);
   }
   _removeTodo(Todo todo){
     setState(() {
-      this.todos.remove(todo);
+      API.deleteTask(todo.id);
+      _getTodos(0);
     });
   }
-  _addToList(Todo todo){
+  _addToList(String title){
     setState(() {
-      this.todos.add(todo);
+      API.storeTodo(title);
     });
   }
 
@@ -60,6 +61,13 @@ class _TodoListState extends State<TodoList> {
               }
           ),
           new FlatButton(
+              onPressed: null,
+              child: Icon(
+                Icons.edit,
+                color: Colors.green,
+              ),
+              ),
+          new FlatButton(
               onPressed: (){
                 showDialog(
                   context: context,
@@ -72,7 +80,6 @@ class _TodoListState extends State<TodoList> {
                           child: Text("Yes"),
                           onPressed: (){
                             setState(() {
-//                              todos.remove(todo);
                               _removeTodo(todo);
                               Navigator.of(context).pop();
                             });
@@ -127,8 +134,13 @@ class _TodoListState extends State<TodoList> {
         }
     );
     if(todo != null){
-      _addToList(todo);
+      _addToList(todo.title);
+      _getTodos(0);
     }
+  }
+
+  _editTodo() {
+
   }
 
   @override

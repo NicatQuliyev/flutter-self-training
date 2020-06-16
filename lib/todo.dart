@@ -1,14 +1,17 @@
 class Todo {
   Todo({this.title, this.isDone = false});
 
+  int id;
   String title;
   bool isDone;
 
   Todo.fromJson(Map json)
-    : title  = json['title'],
+    :
+    id = json['id'],
+    title  = json['title'],
     isDone = false;
 
   Map toJson(){
-    return {'title': title, 'isDone': isDone};
+    return {'id': id,'title': title, 'isDone': isDone};
   }
 }
