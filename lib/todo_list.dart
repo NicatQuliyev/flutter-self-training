@@ -12,12 +12,13 @@ class _TodoListState extends State<TodoList> {
 
   initState(){
     super.initState();
-    _getTodos(0);
+     _getTodos(0);
   }
 
   _getTodos(int state){
     API.getTodos(state).then((response){
           setState(() {
+            todo_future = API.getTodos(0);
             Iterable list = json.decode(response.body);
             todos = list.map((model) => Todo.fromJson(model)).toList();
           });
@@ -27,6 +28,7 @@ class _TodoListState extends State<TodoList> {
   List<Todo> todos = [
   ];
   Todo selectedTodo = null;
+  Future todo_future = null;
 
     TextEditingController controller = new TextEditingController();
     TextEditingController editController = new TextEditingController();
@@ -34,6 +36,10 @@ class _TodoListState extends State<TodoList> {
   _toggleTodo(Todo todo, bool isChecked){
     todo.isDone = isChecked;
     API.updateTask(todo);
+    setState(() {
+      todo_future = null;
+    });
+    todos.clear();
     _getTodos(0);
     final snackbar = SnackBar(content: Text("Done: ${todo.title}"), backgroundColor: Colors.greenAccent);
     Scaffold.of(context).showSnackBar(snackbar);
@@ -63,6 +69,11 @@ class _TodoListState extends State<TodoList> {
             content: TextField(
               controller: editController,
               autofocus: true,
+              onSubmitted: (str){
+                final todo = new Todo(title: str);
+                controller.clear();
+                Navigator.of(context).pop(todo);
+              },
             ),
             actions: <Widget>[
               FlatButton(
@@ -84,6 +95,10 @@ class _TodoListState extends State<TodoList> {
         }
     );
     if(todo != null){
+      setState(() {
+        todo_future = null;
+      });
+      todos.clear();
       setState(() {
         selectedTodo.title = editController.text;
       });
@@ -187,6 +202,10 @@ class _TodoListState extends State<TodoList> {
         }
     );
     if(todo != null){
+      setState(() {
+        todo_future = null;
+      });
+      todos.clear();
       _addToList(todo.title);
       _getTodos(0);
     }
@@ -195,9 +214,20 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-          itemBuilder: _buildItem,
-          itemCount: todos.length,
+      body: Center(
+        child: FutureBuilder(
+          future: todo_future,
+          builder: (context, snapshot){
+            if(snapshot.hasData)
+              {
+                return ListView.builder(
+                  itemBuilder: _buildItem,
+                  itemCount: todos.length,
+                );
+              }
+            return CircularProgressIndicator();
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add_box),

@@ -11,11 +11,12 @@ class TodoListDone extends StatefulWidget {
 
 class _TodoListState extends State<TodoListDone>{
   List<Todo> todos = [];
-
+  Future todo_future = null;
 
   _getTodos(int state){
     API.getTodos(state).then((response){
       setState(() {
+        todo_future = API.getTodos(1);
         Iterable list = json.decode(response.body);
         todos = list.map((model) => Todo.fromJson(model)).toList();
       });
@@ -100,9 +101,20 @@ class _TodoListState extends State<TodoListDone>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemBuilder: _buildItem,
-        itemCount: todos.length,
+      body: Center(
+        child: FutureBuilder(
+          future: todo_future,
+          builder: (context, snapshot){
+            if(todos.length > 0)
+            {
+              return ListView.builder(
+                itemBuilder: _buildItem,
+                itemCount: todos.length,
+              );
+            }
+            return CircularProgressIndicator();
+          },
+        ),
       ),
     );
   }
