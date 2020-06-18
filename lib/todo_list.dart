@@ -45,18 +45,17 @@ class _TodoListState extends State<TodoList> {
     Scaffold.of(context).showSnackBar(snackbar);
   }
   _removeTodo(Todo todo){
-    setState(() {
-      API.deleteTask(todo.id);
-      _getTodos(0);
-    });
-    final snackbar = SnackBar(content: Text("Removed: ${todo.title}"), backgroundColor: Colors.red);
+      API.deleteTask(todo.id).then((value) => {
+        _getTodos(0)
+      });
+    final snackbar = SnackBar(content: Text("Removed: $todo.title"), backgroundColor: Colors.red);
     Scaffold.of(context).showSnackBar(snackbar);
   }
   _addToList(String title){
-    setState(() {
-      API.storeTodo(title);
-    });
-    final snackbar = SnackBar(content: Text("Added: ${title}"), backgroundColor: Colors.greenAccent);
+      API.storeTodo(title).then((value) => {
+        _getTodos(0)
+      });
+    final snackbar = SnackBar(content: Text("Added: $title"), backgroundColor: Colors.greenAccent);
     Scaffold.of(context).showSnackBar(snackbar);
   }
 
@@ -111,63 +110,72 @@ class _TodoListState extends State<TodoList> {
 
   Widget _buildItem(BuildContext context, int index) {
     final todo = todos[index];
-    return ListTile(
-      onTap: null,
-      title: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text(todo.title)),
-
-          new IconButton(
-              icon: Icon(Icons.done_all, color: Colors.green),
-              onPressed: (){
-                _toggleTodo(todo, true);
-              }
+    return new Container(
+        child :new Card(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.alarm, color: Colors.blue),
+                title: Text(todo.title),
+                subtitle: Text("Date created: ${todo.created_at}"),
+              ),
+              new ButtonBar(
+                children:[
+                  new IconButton( // Mark as done button
+                      icon: Icon(Icons.check_circle_outline, color: Colors.green),
+                      onPressed: (){
+                        _toggleTodo(todo, true);
+                      }
+                  ),
+                new IconButton( //Edit button
+                    onPressed: () {
+                      setState(() {
+                        selectedTodo = todo;
+                      });
+                      editController.text = selectedTodo.title;
+                      _editTodo();
+                    },
+                    icon: Icon(
+                      Icons.mode_edit,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  new IconButton( //Delete button
+                      icon: Icon(Icons.remove_circle, color: Colors.red,),
+                      onPressed: (){
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                              title: Text("Delete task"),
+                              content: Text("Are you sure to delete this task ?"),
+                              actions: [
+                                FlatButton(
+                                  child: Text("Yes"),
+                                  onPressed: (){
+                                    setState(() {
+                                      _removeTodo(todo);
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                FlatButton(
+                                  child: Text("No"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            );
+                          }
+                        );
+                      },
+                  )
+                ]
+              )
+            ],
           ),
-          new IconButton(
-              onPressed: () {
-                setState(() {
-                  selectedTodo = todo;
-                });
-                editController.text = selectedTodo.title;
-                _editTodo();
-              },
-              icon: Icon(
-                Icons.edit,
-                color: Colors.green,
-              ),
-              ),
-          new IconButton(
-              onPressed: (){
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context){
-                    return AlertDialog(
-                      title: Text("Delete task"),
-                      content: Text("Are you sure to delete this task ?"),
-                      actions: [
-                        FlatButton(
-                          child: Text("Yes"),
-                          onPressed: (){
-                            setState(() {
-                              _removeTodo(todo);
-                              Navigator.of(context).pop();
-                            });
-                          },
-                        ),
-                        FlatButton(
-                          child: Text("No"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        )
-                      ],
-                    );
-                  }
-                );
-              },
-              icon: Icon(Icons.remove_circle, color: Colors.red)
-          )
-        ],
       ),
     );
  }
@@ -178,9 +186,15 @@ class _TodoListState extends State<TodoList> {
         builder: (BuildContext context){
           return AlertDialog(
             title: Text("New todo"),
+            
             content: TextField(
               controller: controller,
               autofocus: true,
+              onSubmitted: (str){
+                final todo = new Todo(title: str);
+                controller.clear();
+                Navigator.of(context).pop(todo);
+              },
             ),
             actions: <Widget>[
               FlatButton(
@@ -214,6 +228,7 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.purple,
       body: Center(
         child: FutureBuilder(
           future: todo_future,

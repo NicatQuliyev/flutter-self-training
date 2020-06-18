@@ -11,7 +11,7 @@ class TodoListDone extends StatefulWidget {
 
 class _TodoListState extends State<TodoListDone>{
   List<Todo> todos = [];
-  Future todo_future = null;
+  Future todo_future;
 
   _getTodos(int state){
     API.getTodos(state).then((response){
@@ -29,55 +29,69 @@ class _TodoListState extends State<TodoListDone>{
   }
 
 
+
+
   Widget _buildItem(BuildContext context, int index) {
     final todo = todos[index];
-    return ListTile(
-      onTap: null,
-      title: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text(todo.title)),
-          new IconButton(
-              icon: Icon(
-                Icons.undo, color: Colors.orange),
-                onPressed: () {
-                  _markUndone(todo);
-                }
-          ),
-          new IconButton(
-              onPressed: (){
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context){
-                      return AlertDialog(
-                        title: Text("Delete task"),
-                        content: Text("Are you sure to delete this task ?"),
-                        actions: [
-                          FlatButton(
-                            child: Text("Yes"),
-                            onPressed: (){
-                              setState(() {
-                                _removeTodo(todo);
-                                Navigator.of(context).pop();
-                              });
-                            },
-                          ),
-                          FlatButton(
-                            child: Text("No"),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          )
-                        ],
+    return new Container(
+        child :new Card(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.check_circle, color: Colors.green),
+                title: Text(todo.title),
+                subtitle: Text("Date created: ${todo.created_at}"),
+              ),
+              new ButtonBar(
+                children:[
+                      new IconButton(
+                    icon: Icon(
+                      Icons.undo, color: Colors.orange),
+                      onPressed: () {
+                        _markUndone(todo);
+                      }
+                ),
+                new IconButton(
+                    onPressed: (){
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                              title: Text("Delete task"),
+                              content: Text("Are you sure to delete this task ?"),
+                              actions: [
+                                FlatButton(
+                                  child: Text("Yes"),
+                                  onPressed: (){
+                                    setState(() {
+                                      _removeTodo(todo);
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                FlatButton(
+                                  child: Text("No"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            );
+                          }
                       );
-                    }
-                );
-              },
-              icon: Icon(Icons.remove_circle, color: Colors.red)
-          )
-        ],
+                    },
+                    icon: Icon(Icons.remove_circle, color: Colors.red)
+                )
+                ]
+              )
+            ],
+          ),
       ),
     );
-  }
+ }
+
+
 
   _removeTodo(Todo todo){
     setState(() {
@@ -101,6 +115,7 @@ class _TodoListState extends State<TodoListDone>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.purple,
       body: Center(
         child: FutureBuilder(
           future: todo_future,

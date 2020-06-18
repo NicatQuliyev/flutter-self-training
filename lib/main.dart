@@ -17,15 +17,15 @@ class MyApp extends StatelessWidget {
       home: DefaultTabController(
         length: 2,
         child: Scaffold(
-          resizeToAvoidBottomInset: false,
           appBar: AppBar(
+            backgroundColor: Colors.purple,
             bottom: TabBar(
               tabs: [
                 Tab(icon: Icon(Icons.category)),
                 Tab(icon: Icon(Icons.done))
               ],
             ),
-            title: Text("To-do List"),
+            title: Text("To-do List", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold)),
           ),
           body: TabBarView(
             children: [

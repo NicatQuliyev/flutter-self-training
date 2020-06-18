@@ -9,13 +9,14 @@ const headers = <String, String>{
 };
 
 class API {
+
   static Future getTodos(int state) {
-    var url = baseUrl + "tasks/?isdone=${state}";
+    var url = baseUrl + "tasks/?isdone=$state";
     return http.get(url);
   }
 
   static Future getTask(int id) {
-    var url = baseUrl + "tasks/${id}";
+    var url = baseUrl + "tasks/$id";
     return http.get(url);
   }
 
@@ -33,7 +34,7 @@ class API {
 
   static Future deleteTask(int id)
   {
-    var url = baseUrl + "tasks/${id}";
+    var url = baseUrl + "tasks/$id";
     return http.delete(url);
   }
 
