@@ -2,10 +2,32 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:first_flutter_app/todo.dart';
 import 'API.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:intl/intl.dart';
 
 class TodoList extends StatefulWidget {
   @override
   _TodoListState createState() => _TodoListState();
+}
+
+class DateFiled extends StatelessWidget {
+final format = DateFormat("yyyy-MM-dd");
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: <Widget>[
+      Text('Date (${format.pattern})'),
+      DateTimeField(
+        format: format,
+        onShowPicker: (context, currentValue) {
+          return showDatePicker(
+              context: context,
+              firstDate: DateTime(1900),
+              initialDate: currentValue ?? DateTime.now(),
+              lastDate: DateTime(2100));
+        },
+      ),
+    ]);
+  }
 }
 
 class _TodoListState extends State<TodoList> {
@@ -16,22 +38,26 @@ class _TodoListState extends State<TodoList> {
   }
 
   _getTodos(int state){
-    API.getTodos(state).then((response){
-          setState(() {
-            todo_future = API.getTodos(0);
-            Iterable list = json.decode(response.body);
-            todos = list.map((model) => Todo.fromJson(model)).toList();
-          });
+    setState(() {
+      todo_future = API.getTodos(state);
+    });
+    todo_future.then((response) => {
+      setState(() {
+              Iterable list = json.decode(response.body);
+              todos = list.map((model) => Todo.fromJson(model)).toList();
+        })
     });
   }
 
   List<Todo> todos = [
   ];
-  Todo selectedTodo = null;
-  Future todo_future = null;
+  Todo selectedTodo;
+  Future todo_future;
 
     TextEditingController controller = new TextEditingController();
     TextEditingController editController = new TextEditingController();
+
+    
 
   _toggleTodo(Todo todo, bool isChecked){
     todo.isDone = isChecked;
@@ -48,7 +74,7 @@ class _TodoListState extends State<TodoList> {
       API.deleteTask(todo.id).then((value) => {
         _getTodos(0)
       });
-    final snackbar = SnackBar(content: Text("Removed: $todo.title"), backgroundColor: Colors.red);
+    final snackbar = SnackBar(content: Text("Removed: ${todo.title}"), backgroundColor: Colors.red);
     Scaffold.of(context).showSnackBar(snackbar);
   }
   _addToList(String title){
@@ -111,14 +137,14 @@ class _TodoListState extends State<TodoList> {
   Widget _buildItem(BuildContext context, int index) {
     final todo = todos[index];
     return new Container(
-        child :new Card(
+        child : new Card(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.alarm, color: Colors.blue),
                 title: Text(todo.title),
-                subtitle: Text("Date created: ${todo.created_at}"),
+                subtitle: Text("${todo.created_at}"),
               ),
               new ButtonBar(
                 children:[
@@ -228,7 +254,9 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple,
+      extendBody: true,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      backgroundColor: Colors.blueGrey[800],
       body: Center(
         child: FutureBuilder(
           future: todo_future,
@@ -240,12 +268,25 @@ class _TodoListState extends State<TodoList> {
                   itemCount: todos.length,
                 );
               }
-            return CircularProgressIndicator();
+            return CircularProgressIndicator(backgroundColor: Colors.transparent,valueColor:  new AlwaysStoppedAnimation<Color>(Colors.yellow),);
           },
         ),
       ),
+      bottomNavigationBar: new BottomAppBar(
+        color: Colors.blueGrey[700],
+        shape: CircularNotchedRectangle(),
+        child: Row(
+          children: [
+            IconButton(icon: Icon(Icons.menu, color: Colors.transparent, size: 32.0), onPressed: null),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add_box),
+        child: Center(
+          child: Icon(Icons.add, size: 32.0,),
+        ),
+        backgroundColor: Colors.blueGrey[700],
+        foregroundColor: Colors.white,
         onPressed: (){
           _addTodo();
         },

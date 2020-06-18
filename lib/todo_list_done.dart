@@ -14,12 +14,14 @@ class _TodoListState extends State<TodoListDone>{
   Future todo_future;
 
   _getTodos(int state){
-    API.getTodos(state).then((response){
+    setState(() {
+      todo_future = API.getTodos(state);
+    });
+    todo_future.then((response) => {
       setState(() {
-        todo_future = API.getTodos(1);
-        Iterable list = json.decode(response.body);
-        todos = list.map((model) => Todo.fromJson(model)).toList();
-      });
+              Iterable list = json.decode(response.body);
+              todos = list.map((model) => Todo.fromJson(model)).toList();
+        })
     });
   }
 
@@ -28,20 +30,17 @@ class _TodoListState extends State<TodoListDone>{
     _getTodos(1);
   }
 
-
-
-
   Widget _buildItem(BuildContext context, int index) {
     final todo = todos[index];
     return new Container(
-        child :new Card(
+        child : new Card(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.check_circle, color: Colors.green),
                 title: Text(todo.title),
-                subtitle: Text("Date created: ${todo.created_at}"),
+                subtitle: Text("${todo.created_at}"),
               ),
               new ButtonBar(
                 children:[
@@ -81,7 +80,7 @@ class _TodoListState extends State<TodoListDone>{
                           }
                       );
                     },
-                    icon: Icon(Icons.remove_circle, color: Colors.red)
+                    icon: Icon(Icons.archive, color: Colors.red)
                 )
                 ]
               )
@@ -90,8 +89,6 @@ class _TodoListState extends State<TodoListDone>{
       ),
     );
  }
-
-
 
   _removeTodo(Todo todo){
     setState(() {
@@ -102,8 +99,7 @@ class _TodoListState extends State<TodoListDone>{
     });
   }
 
-  _markUndone(Todo todo)
-  {
+  _markUndone(Todo todo){
     todo.isDone = false;
     API.updateTask(todo).then((res) => {
       _getTodos(1)
@@ -115,7 +111,7 @@ class _TodoListState extends State<TodoListDone>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple,
+      backgroundColor: Colors.blueGrey[800],
       body: Center(
         child: FutureBuilder(
           future: todo_future,
@@ -127,7 +123,7 @@ class _TodoListState extends State<TodoListDone>{
                 itemCount: todos.length,
               );
             }
-            return CircularProgressIndicator();
+            return CircularProgressIndicator(backgroundColor: Colors.transparent,valueColor:  new AlwaysStoppedAnimation<Color>(Colors.yellow),);
           },
         ),
       ),
